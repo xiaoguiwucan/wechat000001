@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "contract": "PKCWeChatTools.dylib selector surface (todo-1: PKC selector contract)",
+  "source_dylib": "/Users/zkx/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_7786337863012_ef02/temp/RWTemp/2026-08/9e20f478899dc29eb19741386f9343c8/PKCWeChatTools.dylib",
+  "source_sha256": "63973b416634913f49bd9c01987c6054886733bf5230e3b5bc5f971fde84d35f",
+  "scan_tools": [
+    "rabin2 -c <dylib>",
+    "strings <dylib>"
+  ],
+  "required": [
+    "AddMsg:MsgWrap:",
+    "AsyncOnPreAddMsg:MsgWrap:",
+    "HandleAppMsg:MsgWrap:",
+    "isAtMe:",
+    "pkcOpenClawText:byChat:",
+    "oc_connectOpenClawWithURL:token:sessionKey:completion:",
+    "sendMsg:toUser:",
+    "pkcReplyMessage:",
+    "getAudioFileName:LocalID:",
+    "pkcAutoDownloadImgOrVideo"
+  ],
+  "declared_methods": {
+    "GXYeazddpmkzikglugu :: NSObject": [
+      "sendMsg:toUser:",
+      "pkcReplyMessage:",
+      "isAtMe:",
+      "oc_connectOpenClawWithURL:token:sessionKey:completion:",
+      "pkcOpenClawText:byChat:"
+    ],
+    "JIXpspsrkhaninkftrdjvypkpimvnjj :: UIViewController": [
+      "pkcAutoDownloadImgOrVideo"
+    ]
+  },
+  "runtime_selector_literals": [
+    "AddMsg:MsgWrap:",
+    "AsyncOnPreAddMsg:MsgWrap:",
+    "HandleAppMsg:MsgWrap:",
+    "getAudioFileName:LocalID:"
+  ],
+  "observed_related": [
+    "CMessageMgr",
+    "PKCVoiceModel",
+    ".silk",
+    "WCDownloadVideoCDNMgr",
+    "PKCHBLogVC",
+    "sendLocalMsg:toUser:",
+    "pkcOpenClawChat",
+    "pkcOpenClawUsers",
+    "p_onlyAt"
+  ],
+  "notes": [
+    "AddMsg:MsgWrap:, AsyncOnPreAddMsg:MsgWrap:, HandleAppMsg:MsgWrap:, getAudioFileName:LocalID: are NOT declared methods in this dylib (rabin2 -c shows 0 method rows); they exist only as runtime selector string literals, i.e. swizzle targets resolved against WeChat host classes such as CMessageMgr.",
+    "The 10 selectors in 'required' are the hook surface the new tweak must reproduce by selector, not by guess.",
+    "No selectors were invented: every entry above was observed in the live dump (rabin2 -c and/or strings)."
+  ]
+}

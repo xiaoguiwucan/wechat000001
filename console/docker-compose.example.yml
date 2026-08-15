@@ -1,0 +1,20 @@
+# Example compose for a generic fnOS / Docker host.
+# Copy to docker-compose.yml, create .env from .env.example, then:
+#   docker compose up -d --build
+services:
+  wechat-console:
+    build: .
+    image: wechat-ingest-console:1.5.3
+    container_name: wechat-ingest-console
+    restart: unless-stopped
+    ports:
+      - "18791:18791"
+    env_file:
+      - .env
+    volumes:
+      - /path/to/wechat-ingest-data:/data
+      - /path/to/silk-decoder:/usr/local/bin/silk-decoder:ro
+    environment:
+      WECHAT_INGEST_ROOT: /data
+      CONSOLE_PORT: "18791"
+      SILK_DECODER: /usr/local/bin/silk-decoder

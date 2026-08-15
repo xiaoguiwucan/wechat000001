@@ -1,0 +1,57 @@
+# wechat-ingest.service - inbox consumer for /root/.openclaw/wechat-ingest
+#
+# Part of the ios-wechat-full-ingest plan (todo 6).  The plugin SFTP-drops
+# inbox/<uuid>.json (+ optional media) into WECHAT_INGEST_ROOT; this unit runs
+# the consumer that atomically moves each inbox item, appends JSONL under
+# groups/<chatroom_id>/ and dms/<wxid>/, copies media/, upserts index.sqlite,
+# then deletes the inbox file (see store/consumer.py, todo 5).
+#
+# Trigger model: wechat-ingest.path watches inbox/ and starts this oneshot
+# unit whenever a new file lands.  One service instance drains the whole
+# pending queue and exits; re-triggers while the service is active are queued
+# by systemd, so the consumer never sees concurrent runners on the same inbox.
+#
+# User= is intentionally root: fnOS runs the existing OpenClaw instance as
+# root and the store lives under /root/.openclaw/wechat-ingest, which this
+# service must be able to create, append to, and remove files from.  There is
+# no reason for a second service user and no scenario where a lesser user can
+# reach the store.  (plan: "Store on fnOS (OpenClaw runs as root)").
+#
+# Network policy: this unit opens NO listener.  It reads local inbox files
+# only.  No Listen*/Socket options, no ExecStartPost that binds a port, no
+# mention of any TCP address.  Ingest transport is the plugin's existing SSH
+# session; reply traffic reuses the existing localhost 18790->18789 forward.
+# Must NOT run a second OpenClaw: ExecStart is python3 + the consumer script,
+# never the openclaw binary.
+
+[Unit]
+Description=WeChat ingest inbox consumer (wechat-ingest)
+Documentation=file:/opt/wechat-ingest/README.md
+After=local-fs.target
+RequiresMountsFor=/root/.openclaw/wechat-ingest
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=WECHAT_INGEST_ROOT=/root/.openclaw/wechat-ingest
+# Recreate the store skeleton at every run so a freshly wiped /root still
+# boots cleanly.  mkdir -p is idempotent; directories already exist on the
+# common path and this is a no-op.
+ExecStartPre=/bin/mkdir -p /root/.openclaw/wechat-ingest/groups
+ExecStartPre=/bin/mkdir -p /root/.openclaw/wechat-ingest/dms
+ExecStartPre=/bin/mkdir -p /root/.openclaw/wechat-ingest/inbox
+ExecStartPre=/bin/mkdir -p /root/.openclaw/wechat-ingest/inbox/failed
+# consumer.py (todo 5) reads WECHAT_INGEST_ROOT from the environment, scans
+# inbox/ for <uuid>.json, processes every pending item, then exits.
+WorkingDirectory=/opt/wechat-ingest/store
+ExecStart=/usr/bin/python3 /opt/wechat-ingest/store/consumer.py
+
+# Hardening: no extra network listener. ProtectHome cannot be read-only
+# because the store lives under /root/.openclaw/wechat-ingest.
+PrivateTmp=yes
+ProtectSystem=full
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

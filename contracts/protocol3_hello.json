@@ -1,0 +1,8 @@
+{
+  "client": "openclaw-control-ui",
+  "mode": "webchat",
+  "version": "1.0.0",
+  "userAgent": "pkc-openclaw-client/1.0.0",
+  "role": "operator",
+  "protocol": 3
+}

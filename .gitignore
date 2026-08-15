@@ -1,0 +1,39 @@
+# secrets / operator-only
+.env
+docs/DEV-INTERNAL.md
+*.pem
+*.p12
+id_rsa
+id_ed25519
+
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# mac / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# WeChat proprietary / dumps / live data
+store/dicts/MsgDict.zstd
+**/*.ipa
+**/090482b9b61f1da8c091e9c6358acb0e*
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.jsonl
+
+# third-party source trees (prebuilt headers/libs in third_party/ios-arm64 are kept)
+third_party/src/
+
+# local build junk
+tweak/.theos/
+*.dSYM/
+.codegraph

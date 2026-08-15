@@ -1,0 +1,17 @@
+services:
+  wechat-console:
+    build: .
+    image: wechat-ingest-console:1.5.3
+    container_name: wechat-ingest-console
+    restart: unless-stopped
+    ports:
+      - "18791:18791"
+    env_file:
+      - .env
+    volumes:
+      - ${WECHAT_DATA:-/vol1/1000/iphone微信蒸馏上传数据}:/data
+      - ${SILK_DECODER_HOST:-/home/zkx/wechat-ingest/tools/silk-decoder}:/usr/local/bin/silk-decoder:ro
+    environment:
+      WECHAT_INGEST_ROOT: /data
+      CONSOLE_PORT: "18791"
+      SILK_DECODER: /usr/local/bin/silk-decoder

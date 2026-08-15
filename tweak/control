@@ -1,0 +1,9 @@
+Package: com.zkx.wechat.ingest
+Name: WeChatIngest
+Version: 0.0.1
+Architecture: iphoneos-arm64
+Description: WeChat ingest hooks (raw dylib for TrollStore/TrollFools; .deb unused)
+Maintainer: zkx
+Author: zkx
+Section: Tweaks
+Depends: firmware (>= 14.0)

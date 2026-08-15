@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "wechat-ingest event",
+  "description": "One ingested WeChat message, written to groups/<chatroom_id>/events.jsonl or dms/<wxid>/events.jsonl and mirrored into index.sqlite. msg_type is the mapped ingest vocabulary; unmapped WeChat types become 'raw' (never dropped).",
+  "type": "object",
+  "required": ["chat_id", "chat_kind", "msg_id", "msg_type", "sender", "ts"],
+  "properties": {
+    "chat_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Group chatroom id or DM wxid. Folder uses chat_name when present."
+    },
+    "chat_name": {
+      "type": ["string", "null"],
+      "description": "Human WeChat title: group name or friend remark/nickname."
+    },
+    "chat_kind": {
+      "type": "string",
+      "enum": ["group", "dm"]
+    },
+    "msg_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message-local id; unique together with chat_id."
+    },
+    "msg_type": {
+      "type": "string",
+      "enum": ["text", "image", "voice", "video", "emoji", "file", "redpacket", "revoke", "announcement", "raw"],
+      "description": "Mapped ingest type. Unknown WeChat types are stored as 'raw' with the original type in extra_json.raw_type."
+    },
+    "sender": {
+      "type": "string",
+      "description": "Sender wxid; may be empty for system messages."
+    },
+    "sender_name": {
+      "type": ["string", "null"],
+      "description": "Sender remark or nickname."
+    },
+    "ts": {
+      "type": "integer",
+      "description": "Unix timestamp (seconds) of the message."
+    },
+    "text": {
+      "type": ["string", "null"],
+      "description": "Message text, or placeholder like '[voice]'/'[image]' for media."
+    },
+    "media_path": {
+      "type": ["string", "null"],
+      "description": "Path relative to the ingest root to the downloaded media file, or null when none."
+    },
+    "extra_json": {
+      "type": ["string", "null"],
+      "description": "Raw JSON text with unmodeled payloads (raw_type, red-packet amount, reply flag, errors)."
+    },
+    "is_self": {
+      "type": ["boolean", "null"],
+      "description": "True when the logged-in WeChat account sent this message."
+    }
+  },
+  "additionalProperties": false
+}

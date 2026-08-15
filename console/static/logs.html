@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>调试日志 · 微信记忆</title>
+  <style>
+    :root { --wx-green: #07c160; }
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      background: #111; color: #e8e8e8; }
+    header { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      background: #1c1c1c; border-bottom: 1px solid #2a2a2a; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 16px; }
+    a, button { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer;
+      background: var(--wx-green); color: #fff; text-decoration: none; font-size: 14px; }
+    a.ghost, button.ghost { background: #333; }
+    button.danger { background: #5a5a5a; }
+    select, input { background: #2a2a2a; color: #eee; border: 1px solid #3a3a3a;
+      border-radius: 8px; padding: 7px 8px; font-size: 13px; }
+    .meta { color: #888; font-size: 12px; min-width: 180px; }
+    pre { flex: 1; margin: 0; padding: 14px; overflow: auto; white-space: pre-wrap;
+      word-break: break-word; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #c8f7c5; }
+    .empty { color: #888; padding: 24px; }
+    label { color: #aaa; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>插件调试日志</h1>
+    <a class="ghost" href="/">返回会话</a>
+    <label>日志文件
+      <select id="file"></select>
+    </label>
+    <label>从
+      <input id="from" type="datetime-local" />
+    </label>
+    <label>到
+      <input id="to" type="datetime-local" />
+    </label>
+    <button id="refresh" type="button">查询</button>
+    <button id="clear" class="danger" type="button">清空当前查看</button>
+    <a id="dl" href="/api/debug-log.md">导出 Markdown</a>
+    <div class="meta" id="meta">读取中…</div>
+  </header>
+  <pre id="log" class="empty">读取中…</pre>
+  <script>
+    const log = document.getElementById("log");
+    const meta = document.getElementById("meta");
+    const fileSel = document.getElementById("file");
+    const fromEl = document.getElementById("from");
+    const toEl = document.getElementById("to");
+    let viewing = true;
+
+    const toUnix = (value) => {
+      if (!value) return "";
+      const t = Date.parse(value);
+      return Number.isNaN(t) ? "" : String(Math.floor(t / 1000));
+    };
+    const query = () => {
+      const q = new URLSearchParams();
+      q.set("name", fileSel.value || "debug.log");
+      const from = toUnix(fromEl.value);
+      const to = toUnix(toEl.value);
+      if (from) q.set("from", from);
+      if (to) q.set("to", to);
+      return q.toString();
+    };
+    async function loadFiles() {
+      const res = await fetch("/api/debug-logs");
+      const data = await res.json();
+      const files = data.files || [];
+      const prev = fileSel.value;
+      fileSel.innerHTML = files.map((f) => {
+        const when = f.ts ? new Date(f.ts * 1000).toLocaleString() : "";
+        const label = `${f.current ? "当前最新" : f.name} · ${when} · ${f.size}B`;
+        return `<option value="${f.name}">${label}</option>`;
+      }).join("") || `<option value="debug.log">当前最新</option>`;
+      if (prev && [...fileSel.options].some((o) => o.value === prev)) fileSel.value = prev;
+    }
+    async function load() {
+      viewing = true;
+      const qs = query();
+      document.getElementById("dl").href = `/api/debug-log.md?${qs}`;
+      const res = await fetch(`/api/debug-log?${qs}`);
+      const data = await res.json();
+      if (!data.text) {
+        log.textContent = data.hint || "还没有日志。手机打开 微信记忆 → 上传调试日志。";
+        log.className = "empty";
+        meta.textContent = "空（文件未删）";
+        return;
+      }
+      log.textContent = data.text;
+      log.className = "";
+      const t = data.ts ? new Date(data.ts * 1000).toLocaleString() : "";
+      meta.textContent = `${data.name || ""} · ${data.size || 0} 字节 · ${t}` + (data.filtered ? " · 已按时间筛选" : "");
+      log.scrollTop = log.scrollHeight;
+    }
+    document.getElementById("refresh").addEventListener("click", async () => {
+      await loadFiles();
+      await load();
+    });
+    document.getElementById("clear").addEventListener("click", () => {
+      viewing = false;
+      log.textContent = "当前查看已清空。磁盘上的日志文件都还在，选文件或点查询即可再看。";
+      log.className = "empty";
+      meta.textContent = "仅清空屏幕，未删除文件";
+    });
+    fileSel.addEventListener("change", load);
+    loadFiles().then(load);
+    setInterval(() => { if (viewing) load(); }, 10000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>微信记忆</title>
+  <style>
+    :root {
+      --red: #ee524c;
+      --ink: #2c1814;
+      --paper: #fffdf9;
+      --wash: #f4ebe6;
+      --me: #ee524c;
+      --other: #fffdf9;
+      --rail: #ee524c;
+      --list: #f7f1ee;
+      --list-hover: #f0e4de;
+      --chat: #f7f1ee;
+      --bar: #fffdf9;
+      --sub: #7a4a42;
+      --name: #a33c36;
+      --line: #2c181424;
+      --chip: #2c1814;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", sans-serif;
+      color: var(--ink);
+      background: var(--wash);
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 52px 248px minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+      height: 100%;
+      width: 100%;
+      min-height: 0;
+      overflow: hidden;
+      background: var(--paper);
+      border: 1.6px solid var(--ink);
+    }
+    .rail {
+      background: var(--rail);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0 10px;
+      border-right: 1.6px solid var(--ink);
+    }
+    .me {
+      width: 34px; height: 34px; border-radius: 999px;
+      background: #fffdf9; color: var(--red);
+      display: grid; place-items: center; font-weight: 800; font-size: 13px;
+      margin-bottom: 16px; border: 1.4px solid var(--ink);
+    }
+    .rail-btn {
+      width: 36px; height: 36px; border: 0; background: transparent;
+      color: #fff8f4; cursor: pointer; border-radius: 999px;
+      display: grid; place-items: center; text-decoration: none;
+    }
+    .rail-btn svg { width: 20px; height: 20px; fill: currentColor; }
+    .rail-btn.on { background: #fffdf9; color: var(--red); }
+    .rail-btn:hover { background: #00000018; }
+    .rail .grow { flex: 1; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #fff8f466; margin-bottom: 8px; border: 1px solid var(--ink);
+    }
+    .dot.on { background: #fffdf9; }
+    .side {
+      background: var(--list);
+      display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%;
+      overflow: hidden;
+      border-right: 1.6px solid var(--ink);
+    }
+    .search-wrap {
+      height: 46px; display: flex; align-items: center; padding: 0 10px;
+    }
+    .search {
+      width: 100%; height: 28px; border: 1.2px solid var(--ink);
+      border-radius: 999px;
+      background: var(--paper); padding: 0 10px 0 28px; font-size: 12px; outline: none; color: var(--ink);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c1814'><path d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.49-1.49-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>");
+      background-repeat: no-repeat; background-position: 8px 50%; background-size: 13px;
+    }
+    .chats { flex: 1 1 0; min-height: 0; overflow: auto; }
+    .chat {
+      display: grid; grid-template-columns: 34px 1fr auto;
+      gap: 8px; padding: 7px 10px; cursor: pointer; align-items: center;
+    }
+    .chat:hover { background: var(--list-hover); }
+    .chat.active { background: var(--red); }
+    .chat.active .name, .chat.active .preview, .chat.active .when { color: #fff8f4; }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 999px;
+      display: grid; place-items: center; color: #fff8f4; font-size: 13px; font-weight: 800;
+      overflow: hidden; flex-shrink: 0; border: 1.2px solid var(--ink);
+    }
+    .meta { min-width: 0; }
+    .name { font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preview {
+      color: var(--sub); font-size: 11px; margin-top: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .when { color: #a07068; font-size: 10px; align-self: start; padding-top: 1px; }
+    .main {
+      display: flex; flex-direction: column;
+      min-width: 0; min-height: 0; height: 100%; overflow: hidden;
+      background: var(--chat); position: relative;
+    }
+    .top {
+      height: 46px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px; background: var(--bar); border-bottom: 1.6px solid var(--ink);
+    }
+    .top h1 { margin: 0; font-size: 15px; font-weight: 800; }
+    .top .more {
+      border: 1.2px solid var(--ink); background: var(--paper); font-size: 16px; letter-spacing: 2px;
+      color: var(--ink); cursor: pointer; padding: 2px 10px; border-radius: 999px;
+    }
+    .menu {
+      position: absolute; right: 12px; top: 44px; background: var(--paper);
+      border-radius: 12px; border: 1.6px solid var(--ink); min-width: 156px;
+      display: none; z-index: 8; overflow: hidden;
+    }
+    .menu.on { display: block; }
+    .menu a, .menu button {
+      display: block; width: 100%; text-align: left; border: 0; background: var(--paper);
+      padding: 9px 14px; font-size: 13px; color: var(--ink); text-decoration: none; cursor: pointer;
+    }
+    .menu a:hover, .menu button:hover { background: var(--list-hover); }
+    .menu .ok { color: var(--red); font-weight: 800; }
+    .menu .off { color: #8a2a24; }
+    .msgs {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 12px 16px;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    .older {
+      display: block; margin: 4px auto 10px; border: 1.2px solid var(--ink);
+      background: var(--paper); color: var(--ink); border-radius: 999px;
+      font-size: 11px; font-weight: 700; padding: 4px 12px; cursor: pointer;
+    }
+    .older:disabled { opacity: .45; cursor: default; }
+    .chip { text-align: center; margin: 10px 0 8px; }
+    .chip span {
+      display: inline-block; background: var(--ink); color: #fff8f4;
+      border-radius: 999px; padding: 2px 8px; font-size: 11px;
+    }
+    .msg {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 8px;
+      width: 100%;
+      margin: 6px 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .msg.mine { justify-content: flex-end; }
+    .msg .body { flex: 0 0 auto; max-width: 268px; overflow: hidden; }
+    .msg.mine .who { display: none; }
+    .who { font-size: 11px; color: var(--name); margin: 0 0 3px 2px; font-weight: 700; }
+    .txt {
+      display: inline-block;
+      max-width: 240px;
+      padding: 7px 10px;
+      border-radius: 14px;
+      border: 1.2px solid var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      background: var(--other);
+      color: #191919;
+    }
+    .msg.mine .txt { background: var(--me); color: #fff8f4; }
+    .pic-box {
+      width: 88px;
+      height: 88px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #ead8d2;
+      flex: none;
+      border: 1.2px solid var(--ink);
+    }
+    .pic {
+      display: block;
+      width: 88px;
+      height: 88px;
+      object-fit: cover;
+      cursor: zoom-in;
+    }
+    .clip {
+      position: relative;
+      display: block;
+      width: 240px;
+      height: 170px;
+      padding: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #1a1210;
+      border: 1.2px solid var(--ink);
+      cursor: pointer;
+      flex: none;
+    }
+    .clip video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    .clip::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #00000030;
+      pointer-events: none;
+    }
+    .clip-play {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 1;
+      width: 52px;
+      height: 52px;
+      margin: -26px 0 0 -26px;
+      border-radius: 999px;
+      background: #fffdf9;
+      border: 1.6px solid var(--ink);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 2px 0 var(--ink);
+      pointer-events: none;
+    }
+    .clip-play svg {
+      width: 22px;
+      height: 22px;
+      margin-left: 3px;
+      fill: var(--red);
+    }
+    .clip:hover .clip-play { background: #fff; }
+    .lightbox video {
+      max-width: min(92vw, 960px);
+      max-height: 86vh;
+      background: #000;
+      outline: none;
+    }
+    .txt.voice {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 72px;
+      max-width: 220px;
+      height: 40px;
+      padding: 0 12px;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+    }
+    .msg.mine .txt.voice { flex-direction: row-reverse; }
+    .v-fill {
+      position: absolute; inset: 0 auto 0 0;
+      width: 0; background: rgba(0,0,0,.07);
+      pointer-events: none;
+    }
+    .msg.mine .v-fill { left: auto; right: 0; background: rgba(0,0,0,.08); }
+    .v-spk {
+      position: relative; z-index: 1;
+      width: 18px; height: 18px; flex: none;
+      color: #333;
+    }
+    .msg.mine .v-spk { transform: scaleX(-1); }
+    .v-spk svg { display: block; width: 18px; height: 18px; }
+    .v-spk path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+    .txt.voice.play .v-spk path:nth-child(1) { animation: arc 1s ease-in-out infinite; }
+    .txt.voice.play .v-spk path:nth-child(2) { animation: arc 1s ease-in-out .15s infinite; }
+    .txt.voice.play .v-spk path:nth-child(3) { animation: arc 1s ease-in-out .3s infinite; }
+    @keyframes arc { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .txt.voice.play .v-spk path { animation: none; }
+    }
+    .v-time {
+      position: relative; z-index: 1;
+      font-size: 13px; color: #333; font-variant-numeric: tabular-nums;
+      min-width: 2.2em;
+    }
+    .msg.mine .v-time { text-align: right; }
+    .miss { color: var(--sub); font-size: 12px; }
+    .rp {
+      width: 188px; background: var(--red);
+      color: #fff8f4; border-radius: 14px; padding: 10px; border: 1.2px solid var(--ink);
+    }
+    .rp b { display: block; color: #fff8f4; font-size: 15px; margin-bottom: 3px; }
+    .card {
+      min-width: 160px; background: var(--paper); border-radius: 14px; padding: 8px 10px; color: var(--ink);
+      border: 1.2px solid var(--ink);
+    }
+    .empty {
+      height: 100%; display: grid; place-items: center;
+      color: var(--sub); font-size: 13px; text-align: center;
+    }
+    .foot {
+      height: 36px; border-top: 1.6px solid var(--ink); background: var(--paper);
+      display: flex; align-items: center; padding: 0 14px;
+      color: var(--sub); font-size: 12px;
+    }
+    .lightbox {
+      position: fixed; inset: 0; background: #000; display: none;
+      place-items: center; z-index: 30;
+    }
+    .lightbox.on { display: grid; }
+    .lightbox img, .lightbox video { max-width: 100vw; max-height: 100vh; }
+    @media (max-width: 760px) {
+      .app { grid-template-columns: 1fr; }
+      .rail { display: none; }
+      .side { display: none; }
+      .side.open { display: flex; position: absolute; inset: 0; z-index: 5; }
+      .foot { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="rail">
+      <div class="me" id="meAva">风</div>
+      <button class="rail-btn on" type="button" title="聊天" aria-label="聊天">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4V6a2 2 0 012-2z"/></svg>
+      </button>
+      <div class="grow"></div>
+      <span class="dot" id="dot" title="插件状态"></span>
+      <button class="rail-btn" id="openMenu" type="button" title="更多" aria-label="更多">
+        <svg viewBox="0 0 24 24"><path d="M12 8a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4z"/></svg>
+      </button>
+    </aside>
+    <aside class="side" id="side">
+      <div class="search-wrap">
+        <input class="search" id="search" placeholder="搜索" />
+      </div>
+      <div class="chats" id="chats"></div>
+    </aside>
+    <section class="main">
+      <div class="top">
+        <h1 id="title">微信记忆</h1>
+        <button class="more" id="openMenu2" type="button">···</button>
+      </div>
+      <div class="menu" id="menu">
+        <button type="button" id="stLine" class="ok">插件在线</button>
+        <a href="/logs">调试日志</a>
+        <a href="/logout">退出登录</a>
+      </div>
+      <div class="msgs" id="msgs">
+        <div class="empty">正在打开最近的会话…</div>
+      </div>
+      <div class="foot">只读查看资料库，不能在这里发消息</div>
+    </section>
+  </div>
+  <div class="lightbox" id="box"></div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let chats = [];
+    let current = null;
+    let pinLatest = true;
+    let lastKey = "";
+    let shown = [];
+    let hasMore = true;
+    let loadingOlder = false;
+    let audioEl = null;
+    let selfWxid = "wxid_7786337863012";
+    let selfName = "风";
+
+    const color = (name) => {
+      let n = 0;
+      for (const ch of String(name || "")) n = (n * 33 + ch.charCodeAt(0)) >>> 0;
+      return ["#ee524c","#c9443b","#a33c36","#d96a4a","#8a2a24","#e07060","#b84a3c"][n % 7];
+    };
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+    }[c]));
+    const pad = (n) => String(n).padStart(2, "0");
+    const wxTime = (ts, short) => {
+      if (!ts) return "";
+      const d = new Date(ts * 1000);
+      if (Number.isNaN(d.getTime())) return "";
+      const now = new Date();
+      const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      const start = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+      const diff = (start(now) - start(d)) / 86400000;
+      if (diff < 1) return hm;
+      if (diff < 2) return short ? "昨天" : `昨天 ${hm}`;
+      if (diff < 7) {
+        const w = ["周日","周一","周二","周三","周四","周五","周六"][d.getDay()];
+        return short ? w : `${w} ${hm}`;
+      }
+      const md = `${d.getMonth()+1}月${d.getDate()}日`;
+      return short ? md : `${md} ${hm}`;
+    };
+    const extra = (ev) => {
+      try { return ev.extra_json ? JSON.parse(ev.extra_json) : {}; }
+      catch { return {}; }
+    };
+    const mediaUrl = (p) => p ? "/media/" + encodeURI(p) : "";
+
+    const renderBody = (ev) => {
+      const x = extra(ev);
+      const skip = x.media_skip || x.media_error;
+      if (ev.msg_type === "image") {
+        if (ev.media_path) {
+          return `<div class="pic-box"><img class="pic" width="88" height="88" src="${esc(mediaUrl(ev.media_path))}" alt="图片" onerror="this.parentNode.innerHTML='<div class=miss>[图片无法预览]</div>'" /></div>`;
+        }
+        return `<div class="miss">${skip ? "[图片未上传]" : "[图片]"}</div>`;
+      }
+      if (ev.msg_type === "video") {
+        if (ev.media_path) {
+          const src = mediaUrl(ev.media_path);
+          return `<button type="button" class="clip" data-src="${esc(src)}" aria-label="播放视频">
+            <video src="${esc(src)}#t=0.4" muted playsinline preload="metadata"></video>
+            <span class="clip-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          </button>`;
+        }
+        return `<div class="miss">${skip ? "[视频未上传]" : "[视频]"}</div>`;
+      }
+      if (ev.msg_type === "voice" || ev.media_kind === "voice") {
+        const src = ev.play_url || mediaUrl(ev.media_path);
+        if (src) {
+          const sec = Math.max(1, parseInt(ev.voice_sec, 10) || 1);
+          const w = Math.min(220, Math.max(72, 56 + sec * 5));
+          const asr = ev.text && ev.text !== "[voice]" && ev.text !== "[语音]" && ev.text !== "[raw]"
+            ? `<div class="miss" style="margin-top:6px">${esc(ev.text)}</div>` : "";
+          return `<div class="txt voice" data-src="${esc(src)}" data-sec="${sec}" style="width:${w}px">
+            <span class="v-fill"></span>
+            <span class="v-spk" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 10.2a4.2 4.2 0 010 3.6"/><path d="M11 7.8a7.4 7.4 0 010 8.4"/><path d="M14.2 5.4a10.6 10.6 0 010 13.2"/></svg>
+            </span>
+            <span class="v-time">${sec}''</span>
+          </div>${asr}`;
+        }
+        return `<div class="miss">${skip ? "[语音未上传]" : "[语音]"}</div>`;
+      }
+      if (ev.msg_type === "emoji") {
+        const xml = x.xml || ev.text || "";
+        const cdn = (xml.match(/cdnurl\s*=\s*"([^"]+)"/i) || [])[1];
+        if (cdn) return `<div class="pic-box"><img class="pic" width="88" height="88" src="${esc(cdn)}" alt="表情" /></div>`;
+        return "［动画表情］";
+      }
+      if (ev.msg_type === "redpacket") return `<div class="rp"><b>微信红包</b>请收下红包</div>`;
+      if (ev.msg_type === "file") {
+        const name = String(ev.text || x.filename || "文件").replace(/^\[file\]$/i, "文件");
+        return `<div class="card">${esc(name)}</div>`;
+      }
+      if (ev.msg_type === "raw") {
+        const t = String(ev.text || ev.card_kind || "").replace(/<[^>]+>/g, " ").replace(/\[raw\]/ig, "").trim();
+        const label = (ev.card_kind || t.replace(/^\[|\]$/g, "") || "卡片消息").slice(0, 40);
+        return `<div class="card">${esc(label)}</div>`;
+      }
+      return esc(ev.text || "");
+    };
+
+    const renderMsgs = (list, stayLatest) => {
+      const box = $("msgs");
+      if (!list.length) {
+        box.innerHTML = `<div class="empty">这个会话还没有记录</div>`;
+        return;
+      }
+      let html = `<button class="older" type="button" id="older"${hasMore ? "" : " disabled"}>${hasMore ? "更早的消息" : "没有更早的了"}</button>`;
+      let lastTs = 0;
+      for (const ev of list) {
+        if (ev.ts && (!lastTs || ev.ts - lastTs > 300)) {
+          html += `<div class="chip"><span>${esc(wxTime(ev.ts))}</span></div>`;
+        }
+        lastTs = ev.ts || lastTs;
+        if (ev.msg_type === "revoke") {
+          html += `<div class="chip"><span>有人撤回了一条消息</span></div>`;
+          continue;
+        }
+        if (ev.msg_type === "announcement") {
+          html += `<div class="chip"><span>${esc(ev.text || "群公告")}</span></div>`;
+          continue;
+        }
+        const rawName = ev.sender_name || "";
+        const rawSender = ev.sender || "";
+        const idLike = (s) => !s || /@chatroom$/.test(s) || s === "群系统";
+        const mine = !!(ev.is_self || rawSender === selfWxid || rawName === selfName);
+        const name = mine
+          ? (idLike(rawName) ? selfName : rawName)
+          : (idLike(rawName) ? "" : rawName);
+        const ava = `<div class="avatar" style="background:${color(name)}">${esc((name || "?").slice(0,1))}</div>`;
+        const isMedia = ev.msg_type === "image" || ev.msg_type === "video";
+        const isVoice = ev.msg_type === "voice" || ev.media_kind === "voice";
+        const inner = isMedia
+          ? renderBody(ev)
+          : isVoice
+            ? `<div class="who">${esc(name)}</div>${renderBody(ev)}`
+            : `<div class="who">${esc(name)}</div><div class="txt">${renderBody(ev)}</div>`;
+        const body = `<div class="body">${inner}</div>`;
+        html += mine
+          ? `<div class="msg mine">${body}${ava}</div>`
+          : `<div class="msg">${ava}${body}</div>`;
+      }
+      const prevTop = box.scrollTop;
+      const prevH = box.scrollHeight;
+      box.innerHTML = html;
+      const older = $("older");
+      if (older) older.addEventListener("click", () => loadOlder());
+      const goBottom = () => { box.scrollTop = box.scrollHeight; };
+      if (stayLatest) {
+        goBottom();
+        requestAnimationFrame(goBottom);
+      } else {
+        box.scrollTop = prevTop + (box.scrollHeight - prevH);
+      }
+      box.querySelectorAll(".pic").forEach((img) => {
+        img.addEventListener("load", () => { if (pinLatest) goBottom(); });
+        img.addEventListener("click", () => openLightbox("image", img.src));
+      });
+      box.querySelectorAll(".clip").forEach((btn) => {
+        const preview = btn.querySelector("video");
+        if (preview) preview.addEventListener("loadeddata", () => { if (pinLatest) goBottom(); });
+        btn.addEventListener("click", () => openLightbox("video", btn.getAttribute("data-src")));
+      });
+      box.querySelectorAll(".txt.voice").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const src = btn.getAttribute("data-src");
+          const timeEl = btn.querySelector(".v-time");
+          const fill = btn.querySelector(".v-fill");
+          const listed = parseInt(btn.getAttribute("data-sec"), 10) || 0;
+          const reset = (sec) => {
+            btn.classList.remove("play");
+            if (timeEl) timeEl.textContent = Math.max(1, Math.round(sec || listed || 1)) + "''";
+            if (fill) fill.style.width = "0";
+          };
+          if (btn.classList.contains("play") && audioEl) {
+            audioEl.pause();
+            audioEl = null;
+            reset(listed);
+            return;
+          }
+          if (audioEl) { audioEl.pause(); audioEl = null; }
+          document.querySelectorAll(".txt.voice.play").forEach((n) => {
+            n.classList.remove("play");
+            const t = n.querySelector(".v-time");
+            const f = n.querySelector(".v-fill");
+            if (t) t.textContent = (n.getAttribute("data-sec") || "1") + "''";
+            if (f) f.style.width = "0";
+          });
+          if (!src) return;
+          btn.classList.add("play");
+          try {
+            const res = await fetch(src, { credentials: "same-origin" });
+            if (!res.ok) throw new Error("http " + res.status);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            audioEl = new Audio(url);
+            audioEl.addEventListener("timeupdate", () => {
+              if (!audioEl) return;
+              const d = audioEl.duration && isFinite(audioEl.duration) ? audioEl.duration : listed || 1;
+              const t = audioEl.currentTime || 0;
+              if (timeEl) timeEl.textContent = Math.max(0, Math.ceil(d - t)) + "''";
+              if (fill) fill.style.width = Math.min(100, (t / d) * 100) + "%";
+            });
+            audioEl.addEventListener("ended", () => {
+              URL.revokeObjectURL(url);
+              audioEl = null;
+              reset(listed);
+            });
+            audioEl.addEventListener("error", () => {
+              reset(listed);
+              btn.insertAdjacentHTML("afterend", "<div class='miss'>语音无法播放</div>");
+            });
+            await audioEl.play();
+          } catch (err) {
+            reset(listed);
+            btn.insertAdjacentHTML("afterend", "<div class='miss'>语音无法播放</div>");
+          }
+        });
+      });
+    };
+
+    const renderChats = (q = "") => {
+      const key = q.trim();
+      $("chats").innerHTML = chats.filter((c) => !key || (c.name + (c.preview || "")).includes(key)).map((c) => {
+        const active = current && current.kind === c.kind && current.folder === c.folder ? " active" : "";
+        return `<div class="chat${active}" data-kind="${esc(c.kind)}" data-folder="${esc(c.folder)}" data-name="${esc(c.name)}">
+          <div class="avatar" style="background:${color(c.name)}">${esc((c.name || "?").slice(0,1))}</div>
+          <div class="meta"><div class="name">${esc(c.name)}</div><div class="preview">${esc(c.preview || "")}</div></div>
+          <div class="when">${esc(wxTime(c.ts, true))}</div>
+        </div>`;
+      }).join("");
+      $("chats").querySelectorAll(".chat").forEach((node) => {
+        node.addEventListener("click", () => {
+          $("side").classList.remove("open");
+          openChat(node.dataset.kind, node.dataset.folder, node.dataset.name);
+        });
+      });
+    };
+
+    async function openChat(kind, folder, name) {
+      current = {kind, folder, name};
+      $("title").textContent = name;
+      renderChats($("search").value);
+      pinLatest = true;
+      lastKey = "";
+      shown = [];
+      hasMore = true;
+      loadingOlder = false;
+      const res = await fetch(`/api/chats/${kind}/${encodeURIComponent(folder)}/messages?limit=80`);
+      const data = await res.json();
+      if (data.self_wxid) selfWxid = data.self_wxid;
+      if (data.self_name) selfName = data.self_name;
+      shown = data.messages || [];
+      hasMore = data.has_more !== false && shown.length >= 80;
+      lastKey = shown.length ? `${shown[shown.length-1].msg_id}:${shown.length}` : "0";
+      renderMsgs(shown, true);
+    }
+
+    async function loadOlder() {
+      if (!current || loadingOlder || !hasMore || !shown.length) return;
+      loadingOlder = true;
+      const btn = $("older");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "正在加载…";
+      }
+      try {
+        const first = shown[0];
+        const qs = new URLSearchParams({
+          limit: "80",
+          before_ts: String(first.ts || 0),
+          before_id: String(first.msg_id || ""),
+        });
+        const res = await fetch(`/api/chats/${current.kind}/${encodeURIComponent(current.folder)}/messages?${qs}`);
+        const data = await res.json();
+        const older = data.messages || [];
+        const have = new Set(shown.map((ev) => String(ev.msg_id)));
+        const add = older.filter((ev) => !have.has(String(ev.msg_id)));
+        hasMore = data.has_more === true;
+        if (add.length) {
+          shown = add.concat(shown);
+          renderMsgs(shown, false);
+        } else {
+          hasMore = false;
+        }
+      } catch (err) {
+        hasMore = true;
+      } finally {
+        loadingOlder = false;
+        const again = $("older");
+        if (again) {
+          again.disabled = !hasMore;
+          again.textContent = hasMore ? "更早的消息" : "没有更早的了";
+        }
+      }
+    }
+
+    async function refreshStatus() {
+      const res = await fetch("/api/status");
+      const s = await res.json();
+      $("dot").className = "dot" + (s.plugin_online ? " on" : "");
+      $("dot").title = s.plugin_online ? "插件在线" : "插件离线";
+      const line = $("stLine");
+      line.textContent = s.plugin_online ? "插件在线" : "插件离线";
+      line.className = s.plugin_online ? "ok" : "off";
+    }
+
+    async function refreshChats(openLatest) {
+      const res = await fetch("/api/chats");
+      const data = await res.json();
+      chats = data.chats || [];
+      renderChats($("search").value);
+      if (openLatest && chats[0]) {
+        openChat(chats[0].kind, chats[0].folder, chats[0].name);
+        return;
+      }
+      if (!current) return;
+      const still = chats.find((c) => c.kind === current.kind && c.folder === current.folder);
+      if (!still) return;
+      const r = await fetch(`/api/chats/${current.kind}/${encodeURIComponent(current.folder)}/messages?limit=80`);
+      const d = await r.json();
+      if (d.self_wxid) selfWxid = d.self_wxid;
+      if (d.self_name) selfName = d.self_name;
+      const list = d.messages || [];
+      const key = list.length ? `${list[list.length-1].msg_id}:tail` : "0";
+      if (key === lastKey) return;
+      lastKey = key;
+      if (pinLatest && !loadingOlder) {
+        shown = list;
+        hasMore = d.has_more !== false && shown.length >= 80;
+        renderMsgs(shown, true);
+        return;
+      }
+      const have = new Set(shown.map((ev) => String(ev.msg_id)));
+      const extra = list.filter((ev) => !have.has(String(ev.msg_id)));
+      if (extra.length) {
+        shown = shown.concat(extra);
+        renderMsgs(shown, false);
+      }
+    }
+
+    const toggleMenu = () => $("menu").classList.toggle("on");
+    $("openMenu").addEventListener("click", toggleMenu);
+    $("openMenu2").addEventListener("click", toggleMenu);
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#menu") && !e.target.closest("#openMenu") && !e.target.closest("#openMenu2")) {
+        $("menu").classList.remove("on");
+      }
+    });
+    $("search").addEventListener("input", () => renderChats($("search").value));
+    $("msgs").addEventListener("scroll", () => {
+      const box = $("msgs");
+      pinLatest = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+      if (box.scrollTop < 24 && current && !loadingOlder && hasMore) loadOlder();
+    });
+    const closeLightbox = () => {
+      const box = $("box");
+      box.querySelectorAll("video").forEach((v) => { v.pause(); v.removeAttribute("src"); v.load(); });
+      box.className = "lightbox";
+      box.innerHTML = "";
+    };
+    const openLightbox = (kind, src) => {
+      if (!src) return;
+      if (audioEl) { audioEl.pause(); audioEl = null; }
+      document.querySelectorAll(".txt.voice.play").forEach((n) => n.classList.remove("play"));
+      const box = $("box");
+      box.className = "lightbox on";
+      if (kind === "video") {
+        box.innerHTML = `<video src="${esc(src)}" controls autoplay playsinline></video>`;
+      } else {
+        box.innerHTML = `<img src="${esc(src)}" alt="" />`;
+      }
+    };
+    $("box").addEventListener("click", (e) => {
+      if (e.target.closest("video")) return;
+      closeLightbox();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && $("box").classList.contains("on")) closeLightbox();
+    });
+    $("title").addEventListener("click", () => $("side").classList.toggle("open"));
+    refreshStatus();
+    refreshChats(true);
+    setInterval(refreshStatus, 15000);
+    setInterval(() => refreshChats(false), 20000);
+  </script>
+</body>
+</html>
