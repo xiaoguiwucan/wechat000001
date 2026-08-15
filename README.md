@@ -17,6 +17,8 @@ NAS  待入库/<uuid>.json [+ 媒体]
 
 当前公开快照：插件 dylib **1.5.32**（源码默认不带私人 NAS 地址），控制台 **1.5.12**。目标微信约 **8.0.75**。
 
+**下载脱密插件：** [Releases / v1.5.32](https://github.com/xiaoguiwucan/wechat000001/releases/tag/v1.5.32) → `WeChatIngest-1.5.32.dylib`
+
 ---
 
 ## 它做什么
