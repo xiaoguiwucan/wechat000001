@@ -33,8 +33,8 @@ import history_map
 import media
 import readable
 
-SELF_WXID = "wxid_7786337863012"
-SELF_NAME = "风"
+SELF_WXID = os.environ.get("WECHAT_SELF_WXID", "")
+SELF_NAME = os.environ.get("WECHAT_SELF_NAME", "")
 ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
 _XML_TYPE = re.compile(r"<type>(\d+)</type>", re.I)
 _MEMBER = re.compile(
@@ -709,7 +709,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", default=str(consumer.default_root()))
     parser.add_argument(
         "--dump",
-        default="/vol1/1000/iphone微信蒸馏上传数据/历史记录/090482b9b61f1da8c091e9c6358acb0e",
+        default=os.environ.get("WECHAT_AIS_DUMP", ""),
     )
     parser.add_argument("--dict", dest="dict_path", default="")
     parser.add_argument("--no-wipe", action="store_true")

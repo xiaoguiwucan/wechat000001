@@ -25,11 +25,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 CONTRACT = HERE / "pkc-selectors.json"
 
-DYLIB = Path(
-    "/Users/zkx/Library/Containers/com.tencent.xinWeChat/Data/Documents/"
-    "xwechat_files/wxid_7786337863012_ef02/temp/RWTemp/2026-08/"
-    "9e20f478899dc29eb19741386f9343c8/PKCWeChatTools.dylib"
-)
+DYLIB = Path(os.environ.get("PKC_DYLIB", ""))
 
 # Selectors todo-1 guarantees. Every one must be declared in
 # pkc-selectors.json["required"] AND be found by the live dylib scan.
@@ -111,7 +107,13 @@ def test_required_selectors_are_declared_in_json() -> None:
 
 def test_live_dylib_contains_required_selectors() -> None:
     """The live dylib scan must contain every selector declared as required."""
-    assert DYLIB.is_file(), f"sample dylib not found: {DYLIB}"
+    if not DYLIB.is_file():
+        try:
+            import pytest
+            pytest.skip("set PKC_DYLIB to a PKC sample dylib to run the live scan")
+        except ImportError:
+            print("SKIP live dylib scan (PKC_DYLIB unset)")
+            return
     declared = required_from_json()
     found = scan_selectors()
     absent = missing_selectors(declared, found)

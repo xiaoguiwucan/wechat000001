@@ -146,10 +146,12 @@ def test_list_chats_reads_jsonl(tmp_path: Path, monkeypatch) -> None:
     assert chats[0]["preview"] == "测试"
 
 
-def test_polish_message_pulls_group_nickname():
+def test_polish_message_pulls_group_nickname(monkeypatch) -> None:
+    monkeypatch.setattr(console_app, "SELF_WXID", "wxid_self")
+    monkeypatch.setattr(console_app, "SELF_NAME", "me")
     ev = {
-        "sender": "wxid_7786337863012",
-        "sender_name": "风",
+        "sender": "wxid_self",
+        "sender_name": "me",
         "is_self": True,
         "text": "saarjoye:\n确实，都是几把人",
     }

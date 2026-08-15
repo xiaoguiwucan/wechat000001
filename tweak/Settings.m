@@ -175,14 +175,14 @@ static BOOL WXIngestProbeTCP(NSString *host,
         // still return sane values without touching PKC state.
         [defaults registerDefaults:@{
             WXIngestKeyEnable: @NO,
-            WXIngestKeySSHHost: @"192.168.1.10",
+            WXIngestKeySSHHost: @"",
             WXIngestKeySSHPort: @22,
-            WXIngestKeySSHUser: @"zkx",
+            WXIngestKeySSHUser: @"",
             WXIngestKeyGatewayPort: @(WXIngestDefaultGatewayPort),
             WXIngestKeyCommandPrefix: @"/",
             WXIngestKeyRecordAllGroups: @NO,
             WXIngestKeyRecordAllDMs: @NO,
-            WXIngestKeyInboxPath: @"/vol1/1000/iphone微信蒸馏上传数据/inbox",
+            WXIngestKeyInboxPath: @"",
             WXIngestKeyWifiOnlyMedia: @YES,
             WXIngestKeyCollectOfficials: @NO,
             WXIngestKeyUploadImage: @YES,
@@ -191,40 +191,35 @@ static BOOL WXIngestProbeTCP(NSString *host,
             WXIngestKeyImageMaxMB: @20,
             WXIngestKeyVideoMaxMB: @50,
             WXIngestKeyAutoSwitch: @YES,
-            WXIngestKeyLANHost: @"192.168.1.10",
+            WXIngestKeyLANHost: @"",
             WXIngestKeyLANPort: @22,
-            WXIngestKeyWANHost: @"hj.wwszxc.tax",
-            WXIngestKeyWANPort: @31631,
+            WXIngestKeyWANHost: @"",
+            WXIngestKeyWANPort: @22,
             WXIngestKeyHudEnabled: @YES,
             WXIngestKeyHudHidden: @NO,
         }];
         NSString *host = [defaults stringForKey:WXIngestKeySSHHost] ?: @"";
         NSString *low = host.lowercaseString;
-        BOOL publicHost = [low isEqualToString:@"hj.wwszxc.tax"] ||
-                          [low hasSuffix:@".wwszxc.tax"];
+        BOOL privateNet = [low hasPrefix:@"192.168."] || [low hasPrefix:@"10."] ||
+                          [low hasPrefix:@"172.16."] || [low hasPrefix:@"172.17."] ||
+                          [low hasPrefix:@"172.18."] || [low hasPrefix:@"127."];
         NSInteger port = [defaults integerForKey:WXIngestKeySSHPort];
-        if (publicHost) {
+        if (host.length && !privateNet && [[defaults stringForKey:WXIngestKeyWANHost] length] == 0) {
             [defaults setObject:host forKey:WXIngestKeyWANHost];
             if (port > 0) {
                 [defaults setInteger:port forKey:WXIngestKeyWANPort];
             }
-        } else if (host.length && ([low hasPrefix:@"192.168."] || [low hasPrefix:@"10."] || [low isEqualToString:@"192.168.1.10"])) {
+        } else if (host.length && privateNet && [[defaults stringForKey:WXIngestKeyLANHost] length] == 0) {
             [defaults setObject:host forKey:WXIngestKeyLANHost];
-            if (port > 0 && port != 31631) {
+            if (port > 0) {
                 [defaults setInteger:port forKey:WXIngestKeyLANPort];
             }
-        }
-        if ([[defaults stringForKey:WXIngestKeyLANHost] length] == 0) {
-            [defaults setObject:@"192.168.1.10" forKey:WXIngestKeyLANHost];
         }
         if ([defaults integerForKey:WXIngestKeyLANPort] <= 0) {
             [defaults setInteger:22 forKey:WXIngestKeyLANPort];
         }
-        if ([[defaults stringForKey:WXIngestKeyWANHost] length] == 0) {
-            [defaults setObject:@"hj.wwszxc.tax" forKey:WXIngestKeyWANHost];
-        }
         if ([defaults integerForKey:WXIngestKeyWANPort] <= 0) {
-            [defaults setInteger:31631 forKey:WXIngestKeyWANPort];
+            [defaults setInteger:22 forKey:WXIngestKeyWANPort];
         }
         [defaults synchronize];
     });
@@ -361,7 +356,7 @@ static BOOL WXIngestProbeTCP(NSString *host,
 
 + (NSString *)inboxPath {
     NSString *path = [[self sharedDefaults] stringForKey:WXIngestKeyInboxPath];
-    return path.length > 0 ? path : @"/vol1/1000/iphone微信蒸馏上传数据/inbox";
+    return path.length > 0 ? path : @"";
 }
 
 + (void)setInboxPath:(NSString *)path {
@@ -436,7 +431,7 @@ static BOOL WXIngestProbeTCP(NSString *host,
 
 + (NSString *)lanHost {
     NSString *host = [[self sharedDefaults] stringForKey:WXIngestKeyLANHost];
-    return host.length ? host : @"192.168.1.10";
+    return host.length ? host : @"";
 }
 
 + (void)setLanHost:(NSString *)host {
@@ -454,7 +449,7 @@ static BOOL WXIngestProbeTCP(NSString *host,
 
 + (NSString *)wanHost {
     NSString *host = [[self sharedDefaults] stringForKey:WXIngestKeyWANHost];
-    return host.length ? host : @"hj.wwszxc.tax";
+    return host.length ? host : @"";
 }
 
 + (void)setWanHost:(NSString *)host {
@@ -463,11 +458,11 @@ static BOOL WXIngestProbeTCP(NSString *host,
 
 + (NSInteger)wanPort {
     NSInteger port = [[self sharedDefaults] integerForKey:WXIngestKeyWANPort];
-    return port > 0 ? port : 31631;
+    return port > 0 ? port : 22;
 }
 
 + (void)setWanPort:(NSInteger)port {
-    [[self sharedDefaults] setInteger:port > 0 ? port : 31631 forKey:WXIngestKeyWANPort];
+    [[self sharedDefaults] setInteger:port > 0 ? port : 22 forKey:WXIngestKeyWANPort];
 }
 
 + (BOOL)usingLAN {
@@ -554,13 +549,13 @@ static BOOL WXIngestProbeTCP(NSString *host,
               ]},
             @{@"header": @"地址",
               @"rows": @[
-                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyLANHost, @"title": @"内网主机", @"placeholder": @"192.168.1.10"},
+                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyLANHost, @"title": @"内网主机", @"placeholder": @"10.0.0.2"},
                   @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyLANPort, @"title": @"内网端口", @"placeholder": @"22", @"keyboard": @"number"},
-                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyWANHost, @"title": @"公网主机", @"placeholder": @"hj.wwszxc.tax"},
-                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyWANPort, @"title": @"公网端口", @"placeholder": @"31631", @"keyboard": @"number"},
-                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeySSHUser, @"title": @"用户名", @"placeholder": @"zkx"},
+                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyWANHost, @"title": @"公网主机", @"placeholder": @"nas.example.com"},
+                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyWANPort, @"title": @"公网端口", @"placeholder": @"22", @"keyboard": @"number"},
+                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeySSHUser, @"title": @"用户名", @"placeholder": @"sftpuser"},
                   @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeySSHPassword, @"title": @"密码", @"placeholder": @"SSH 密码", @"secure": @YES},
-                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyInboxPath, @"title": @"Inbox", @"placeholder": @"/vol1/1000/iphone微信蒸馏上传数据/inbox", @"stacked": @YES},
+                  @{@"kind": @(WXIngestRowKindTextField), @"key": WXIngestKeyInboxPath, @"title": @"Inbox", @"placeholder": @"/data/inbox", @"stacked": @YES},
               ]},
         ];
     }

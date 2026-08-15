@@ -19,7 +19,7 @@
 #import <unistd.h>
 
 static NSString * const kWXIngestSftpErrorDomain = @"com.zkx.wechat.ingest.sftp";
-static NSString * const kWXIngestDefaultRemoteInbox = @"/vol1/1000/iphone微信蒸馏上传数据/inbox";
+static NSString * const kWXIngestDefaultRemoteInbox = @"/data/inbox";
 
 @implementation WeChatIngestSftpInboxClient {
     NSString *_host;

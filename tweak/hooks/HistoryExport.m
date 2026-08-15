@@ -160,7 +160,7 @@ static void WXHistNormalizeIdleState(void) {
 
 static NSString *WXHistDestPath(void) {
     NSString *inbox = [WXIngestSettings inboxPath];
-    return inbox.length ? inbox : @"/vol1/1000/iphone微信蒸馏上传数据/inbox";
+    return inbox.length ? inbox : @"/data/inbox";
 }
 
 static NSString *WXHistMD5(NSString *text) {

@@ -19,17 +19,17 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
-ROOT = Path(os.environ.get("WECHAT_INGEST_ROOT", "/vol1/1000/iphone微信蒸馏上传数据"))
+ROOT = Path(os.environ.get("WECHAT_INGEST_ROOT", "/data"))
 PORT = int(os.environ.get("CONSOLE_PORT", "18791"))
-LAN_URL = os.environ.get("CONSOLE_LAN_URL", f"http://192.168.1.10:{PORT}")
-PUBLIC_URL = os.environ.get("CONSOLE_PUBLIC_URL", "http://hj.wwszxc.tax:31632")
-SILK_DECODER = os.environ.get("SILK_DECODER", "/home/zkx/wechat-ingest/tools/silk-decoder")
+LAN_URL = os.environ.get("CONSOLE_LAN_URL", f"http://127.0.0.1:{PORT}")
+PUBLIC_URL = os.environ.get("CONSOLE_PUBLIC_URL", "")
+SILK_DECODER = os.environ.get("SILK_DECODER", "/usr/local/bin/silk-decoder")
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-SELF_WXID = os.environ.get("WECHAT_SELF_WXID", "wxid_7786337863012")
-VERSION = "1.5.11"
-SELF_NAME = os.environ.get("WECHAT_SELF_NAME", "风")
+SELF_WXID = os.environ.get("WECHAT_SELF_WXID", "")
+VERSION = "1.5.12"
+SELF_NAME = os.environ.get("WECHAT_SELF_NAME", "")
 SETTINGS_NAME = "console.json"
-CONSOLE_USER = os.environ.get("CONSOLE_USER", "zkx")
+CONSOLE_USER = os.environ.get("CONSOLE_USER", "admin")
 CONSOLE_PASSWORD = os.environ.get("CONSOLE_PASSWORD", "")
 CONSOLE_SECRET = os.environ.get("CONSOLE_SECRET") or secrets.token_hex(32)
 SESSION_COOKIE = "wx_console_sess"

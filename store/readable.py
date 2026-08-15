@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 from datetime import datetime, timedelta, timezone
@@ -14,7 +15,7 @@ from xml.etree import ElementTree as ET
 import consumer
 
 CST = timezone(timedelta(hours=8))
-SELF_WXID = "wxid_7786337863012"
+SELF_WXID = os.environ.get("WECHAT_SELF_WXID", "")
 
 TYPE_CN = {
     "text": "文字",
@@ -207,6 +208,8 @@ def move_officials(root: Path) -> int:
 
 
 def maybe_rename_self(root: Path) -> None:
+    if not SELF_WXID:
+        return
     src = root / consumer.DIR_DMS / SELF_WXID
     dst = root / consumer.DIR_DMS / "我"
     if src.is_dir() and not dst.exists():

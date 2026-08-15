@@ -9,7 +9,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-ROOT = Path(os.environ.get("WECHAT_INGEST_ROOT", "/vol1/1000/iphone微信蒸馏上传数据"))
+ROOT = Path(os.environ.get("WECHAT_INGEST_ROOT", "/data/wechat-ingest"))
 CLI = Path(__file__).resolve().parent / "cli.py"
 CST = timezone(timedelta(hours=8))
 

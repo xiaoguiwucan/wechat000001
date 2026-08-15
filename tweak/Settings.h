@@ -44,7 +44,7 @@ FOUNDATION_EXPORT NSString * const WXIngestKeyAutoSwitch;          // ingest.net
 FOUNDATION_EXPORT NSString * const WXIngestKeyLANHost;             // ingest.net.lan_host
 FOUNDATION_EXPORT NSString * const WXIngestKeyLANPort;             // ingest.net.lan_port (default 22)
 FOUNDATION_EXPORT NSString * const WXIngestKeyWANHost;             // ingest.net.wan_host
-FOUNDATION_EXPORT NSString * const WXIngestKeyWANPort;             // ingest.net.wan_port (default 31631)
+FOUNDATION_EXPORT NSString * const WXIngestKeyWANPort;             // ingest.net.wan_port (default 22)
 FOUNDATION_EXPORT NSString * const WXIngestKeyHudEnabled;          // ingest.hud.enabled (BOOL, default YES)
 FOUNDATION_EXPORT NSString * const WXIngestKeyHudHidden;           // ingest.hud.hidden (BOOL, default NO)
 FOUNDATION_EXPORT NSString * const WXIngestKeyHudFrame;            // ingest.hud.frame

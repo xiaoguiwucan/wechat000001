@@ -200,7 +200,7 @@ def test_import_mini_dump_wipes_and_splits(tmp_path: Path):
     assert lines[0]["sender"] == "小风"
     assert lines[0]["text"] == "啊"
     assert lines[1]["is_self"] is True
-    assert lines[1]["sender_name"] == "风"
+    assert lines[1]["sender_name"] == (ais.SELF_NAME or ais.SELF_WXID or lines[1]["sender"])
     assert lines[2]["msg_type"] == "image"
     assert lines[2]["media_path"].endswith("3.pic")
     assert (gdir / "图片" / "3.pic").is_file()

@@ -16,7 +16,7 @@
 #import <dispatch/dispatch.h>
 
 static NSString * const WXIngestPluginTitle = @"微信记忆";
-static NSString * const WXIngestPluginVersion = @"1.5.31";
+static NSString * const WXIngestPluginVersion = @"1.5.32";
 
 static BOOL WXAtLeast(NSInteger major) {
     static NSInteger ver = -1;
@@ -299,7 +299,7 @@ static void WeChatIngestCleanupHost(UIViewController *vc);
     }
     if ([key isEqualToString:@"status.url"]) {
         NSString *url = server[@"public_url"] ?: server[@"url"];
-        return url.length ? url : @"http://192.168.1.10:18791";
+        return url.length ? url : @"http://127.0.0.1:18791";
     }
     if ([key isEqualToString:@"hint.gateway"]) {
         return @"本机探测用，上传不走它";
@@ -326,7 +326,7 @@ static void WeChatIngestCleanupHost(UIViewController *vc);
         return [WXIngestSettings sshPassword].length ? @"已填写" : @"未填，去连接飞牛";
     }
     if ([key isEqualToString:@"cfg.openclawUrl"]) {
-        return @"hj.wwszxc.tax:31630（PKC 用）";
+        return @"由 PKC 单独配置";
     }
     if ([key isEqualToString:@"status.route"]) {
         return [NSString stringWithFormat:@"%@ · %@  %@:%ld",

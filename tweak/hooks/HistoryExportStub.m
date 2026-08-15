@@ -19,7 +19,7 @@
 + (NSString *)progressLine { return @"当前是稳妥进微信版，导出引擎已卸下，避免闪退。"; }
 + (NSString *)destinationPath {
     NSString *inbox = [WXIngestSettings inboxPath];
-    return inbox.length ? inbox : @"/vol1/1000/iphone微信蒸馏上传数据/inbox";
+    return inbox.length ? inbox : @"/data/inbox";
 }
 + (float)fraction { return 0; }
 @end

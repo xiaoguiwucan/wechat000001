@@ -15,7 +15,7 @@ set -eu
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TWEAK_DIR="$ROOT/tweak"
 OUT_DIR="$ROOT/build"
-VERSION="1.5.31"
+VERSION="1.5.32"
 OUT="$OUT_DIR/WeChatIngest.dylib"
 VERSIONED="$OUT_DIR/WeChatIngest-${VERSION}.dylib"
 mkdir -p "$OUT_DIR"

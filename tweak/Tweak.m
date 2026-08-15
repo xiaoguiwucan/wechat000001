@@ -68,7 +68,7 @@ static void WeChatIngestInitializer(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         WeChatIngestInstallAlertBlocker();
-        WeChatIngestDebugLog(@"dylib loaded 1.5.31");
+        WeChatIngestDebugLog(@"dylib loaded 1.5.32");
         dispatch_async(dispatch_get_main_queue(), ^{
             @try {
                 [WXIngestNetwork start];

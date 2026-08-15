@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-ROOT = Path(os.environ.get("WECHAT_INGEST_ROOT", "/vol1/1000/iphone微信蒸馏上传数据"))
+ROOT = Path(os.environ.get("WECHAT_INGEST_ROOT", "/data/wechat-ingest"))
 FFMPEG = shutil.which("ffmpeg") or "/usr/bin/ffmpeg"
 
 

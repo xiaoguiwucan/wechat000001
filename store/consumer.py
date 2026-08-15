@@ -41,7 +41,7 @@ from pathlib import Path
 import history_map
 import media
 
-DEFAULT_ROOT = "/vol1/1000/iphone微信蒸馏上传数据"
+DEFAULT_ROOT = "/data/wechat-ingest"
 _PERSIST_LOCK = threading.Lock()
 
 DIR_GROUPS = "群聊"

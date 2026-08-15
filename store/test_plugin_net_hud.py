@@ -23,8 +23,9 @@ def test_settings_keys_declared():
     ):
         assert key in impl
     assert "autoSwitchNetwork" in header
-    assert "hj.wwszxc.tax" in impl
-    assert "31631" in impl
+    assert "nas.example.com" in impl
+    assert "privateNet" in impl
+    assert "ingest.net.wan_port" in impl
 
 
 def test_effective_host_uses_wifi_or_wan():
@@ -55,5 +56,5 @@ def test_hud_is_draggable_and_hideable():
     assert "chatLab" not in hud
     ui = (TWEAK / "hooks/SettingsUI.m").read_text(encoding="utf-8")
     assert "showHud" in ui
-    assert "1.5.31" in ui
+    assert "1.5.32" in ui
     assert "mangaRed" in (TWEAK / "hooks/UploadHUD.m").read_text(encoding="utf-8")

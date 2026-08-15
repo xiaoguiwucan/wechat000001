@@ -4,14 +4,14 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DATA="${WECHAT_INGEST_ROOT:-/vol1/1000/iphone微信蒸馏上传数据}"
+DATA="${WECHAT_INGEST_ROOT:-$HOME/wechat-ingest/data}"
 UNIT_DIR="${HOME}/.config/systemd/user"
-DOCKER_DIR="/vol1/1000/docker/wechat-ingest-console"
+DOCKER_DIR="${WECHAT_CONSOLE_DOCKER_DIR:-$HOME/wechat-ingest/console}"
 PORT="${CONSOLE_PORT:-18791}"
 
 mkdir -p "$DATA/status" "$UNIT_DIR"
 
-if [ -d /vol1/1000/docker ]; then
+if [ -n "${WECHAT_CONSOLE_DOCKER_DIR:-}" ]; then
   mkdir -p "$DOCKER_DIR"
   cp -a "$ROOT/console/." "$DOCKER_DIR/"
   echo "compose copied to $DOCKER_DIR"
@@ -26,9 +26,9 @@ After=network.target
 Type=simple
 Environment=WECHAT_INGEST_ROOT=$DATA
 Environment=CONSOLE_PORT=$PORT
-Environment=CONSOLE_PUBLIC_URL=http://192.168.1.10:$PORT
-Environment=SILK_DECODER=/home/zkx/wechat-ingest/tools/silk-decoder
-Environment=WECHAT_SELF_WXID=wxid_7786337863012
+Environment=CONSOLE_PUBLIC_URL=http://127.0.0.1:$PORT
+Environment=SILK_DECODER=${SILK_DECODER:-/usr/local/bin/silk-decoder}
+Environment=WECHAT_SELF_WXID=${WECHAT_SELF_WXID:-}
 WorkingDirectory=$ROOT/console
 ExecStart=/usr/bin/python3 -u $ROOT/console/app.py
 Restart=on-failure
@@ -49,4 +49,4 @@ else
   echo "start the compose later from 飞牛 Docker: $DOCKER_DIR"
 fi
 
-echo "open http://192.168.1.10:$PORT"
+echo "open http://127.0.0.1:$PORT"

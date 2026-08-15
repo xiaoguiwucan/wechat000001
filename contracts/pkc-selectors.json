@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "contract": "PKCWeChatTools.dylib selector surface (todo-1: PKC selector contract)",
-  "source_dylib": "/Users/zkx/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_7786337863012_ef02/temp/RWTemp/2026-08/9e20f478899dc29eb19741386f9343c8/PKCWeChatTools.dylib",
+  "source_dylib": "PKCWeChatTools.dylib (set PKC_DYLIB for a live scan)",
   "source_sha256": "63973b416634913f49bd9c01987c6054886733bf5230e3b5bc5f971fde84d35f",
   "scan_tools": [
     "rabin2 -c <dylib>",

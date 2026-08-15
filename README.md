@@ -15,7 +15,7 @@ NAS  待入库/<uuid>.json [+ 媒体]
 网页控制台 :18791
 ```
 
-当前公开快照：插件 dylib **1.5.31**，控制台 **1.5.11**。目标微信约 **8.0.75**。
+当前公开快照：插件 dylib **1.5.32**（源码默认不带私人 NAS 地址），控制台 **1.5.12**。目标微信约 **8.0.75**。
 
 ---
 
@@ -48,7 +48,7 @@ NAS  待入库/<uuid>.json [+ 媒体]
 
 | 文档 | 内容 |
 |---|---|
-| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | 架构、类型映射、代码从哪改、已知限制 |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | **详细开发手册**：架构、每个文件、设置键、类型表、SFTP、控制台 API、编译 |
 | [docs/DEPLOY-FNOS.md](docs/DEPLOY-FNOS.md) | **飞牛 NAS 部署全文**：目录、systemd、Docker、frp、爱思导入、排障 |
 | [docs/install-quanqian.md](docs/install-quanqian.md) | 全能签注入微信 |
 | [docs/install-trollfools.md](docs/install-trollfools.md) | TrollFools 注入 |
@@ -69,7 +69,7 @@ bash scripts/build-dylib.sh
 ```
 
 用全能签或 TrollFools 注入 `com.tencent.xin`。入口：**我 → 插件 → 微信记忆**。  
-填 NAS 的 SSH（内网 IP:22，或 frp 域名:映射端口）、能写 inbox 的用户和密码。打开「启用全量记录」，点「测试 SSH」。
+**公开版 dylib 不预置任何服务器。** 必须自己填内网/公网 SSH、用户密码、Inbox 路径，再打开「启用全量记录」并点「测试 SSH」。
 
 细节：[install-quanqian.md](docs/install-quanqian.md)
 
